@@ -9,17 +9,25 @@ char const* getVersion() {
 class Voiture
 {
     public:
-        Voiture(const std::string &nom, int litreEssence) : nom(nom), litreEssence(litreEssence) {}
+        Voiture(const std::string &nom, int volumeEssence) : nom(nom), volumeEssence(volumeEssence) {}
         ~Voiture() {}
 
-        void rouler() { litreEssence--; }
-        const std::string &get_nom() const { return nom; }
-        int get_litreEssence() const { return litreEssence; }
-		void setEssence(int &essence_) { litreEssence = essence_; }
+        void roule() {
+	       volumeEssence--;
+       	}
+        const std::string &get_nom() const {
+	       return nom;
+       	}
+        int get_volumeEssence() const {
+	       return volumeEssence;
+       	}
+	void remplirEssence(int &essence_) {
+	       volumeEssence = volumeEssence + essence_;
+       	}
 
     private:
         std::string nom;
-        int litreEssence;
+        int volumeEssence;
 };
  
 namespace py = pybind11;
@@ -33,8 +41,8 @@ PYBIND11_MODULE(voiture_component,greetings)
    // bindings to Voiture class
     py::class_<Voiture>(greetings, "Voiture", py::dynamic_attr())
         .def(py::init<const std::string &, int>())
-        .def("rouler", &Voiture::rouler)
-        .def("get_litreEssence", &Voiture::get_litreEssence)
+        .def("roule", &Voiture::roule)
+        .def("get_volumeEssence", &Voiture::get_volumeEssence)
         .def("get_nom", &Voiture::get_nom)
-		.def("setEssence", &Voiture::setEssence);
+	.def("remplirEssence", &Voiture::remplirEssence);
 }
