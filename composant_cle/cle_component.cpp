@@ -36,7 +36,7 @@ class Cle
             }
         }
 
-        void calculatePublicKey(const unsigned char *privateKey, unsigned char *publicKey) { 
+        void calculatePublicKey(unsigned char *privateKey, unsigned char *publicKey) { 
             const struct uECC_Curve_t * curve = uECC_secp256k1(); 
             uECC_make_key(privateKey, publicKey, curve);
         }
