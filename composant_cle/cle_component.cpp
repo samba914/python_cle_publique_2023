@@ -1,75 +1,97 @@
+#include <string>
 #include <pybind11/pybind11.h>
 #include "./micro-ecc/uECC.h"
 
 char version[]="1.0";
 
-char const* getVersion() {
+const char* getVersion() {
 	return version;
 }
 
 class Cle
 {
     private:
-        char *  publicKey;
-        char *  privateKey;
+        std::string publicKey;
+        std::string privateKey;
+        
+        unsigned char hexchr2bin(const char hex)
+        {
+            unsigned char result;
+
+            if (hex >= '0' && hex <= '9') {
+                result = hex - '0';
+            } else if (hex >= 'A' && hex <= 'F') {
+                result = hex - 'A' + 10;
+            } else if (hex >= 'a' && hex <= 'f') {
+                result = hex - 'a' + 10;
+            } else {
+                return 0;
+            }
+            return result;
+        }
+
+        void hexStringToBin(unsigned char *out, const char * hexPrivate) {
+            for (int i=0; i<32; i++){
+                out[i] = hexchr2bin(hexPrivate[2*i])<<4 | hexchr2bin(hexPrivate[2*i+1]);
+            }
+        }
+
+        void calculatePublicKey(const unsigned char *privateKey, unsigned char *publicKey) { 
+            const struct uECC_Curve_t * curve = uECC_secp256k1(); 
+            uECC_make_key(privateKey, publicKey, curve);
+        }
+
     public:
         Cle() {}
         ~Cle() {}
 
-        void initialize(char *  priv) : {
+        void initialize(const std::string& priv) {
             privateKey = priv;
-            char * a;
-            hexStringToBin(a, privateKey);
-            char * b;
-            calculatePublicKey(&a, &b);
+            unsigned char a[64];
+            hexStringToBin(a, privateKey.c_str());
+            unsigned char b[64];
+            calculatePublicKey(a, b);
+            publicKey = std::string((char*)b, 64);
         }
 
-        char *  getPrivateKey() const {
+        std::string getPrivateKey() const {
 	       return privateKey;
        	}
 
-        char *  getPublicKey() const {
+        std::string getPublicKey() const {
 	       return publicKey;
        	}
-        void hexStringToBin(unsigned char *out,const char * hexPrivate) {
-            for (int i=0; i<32; i++){
-            out[i] = hexchr2bin(hexPrivate[2*i])<<4 | hexchr2bin(hexPrivate[2*i+1]);
-        }
-}
 
-        void calculatePublicKey(const char  *privateKey, char *publicKey) { 
-            const struct uECC_Curve_t * curve = uECC_secp256k1(); 
-            uECC_make_key(privateKey, publicKey, curve); 
-        }
-
-    
 };
- 
-namespace py = pybind11;
 
+namespace py = pybind11;
 
 PYBIND11_MODULE(cle_component,greetings)
 {
   greetings.doc() = "greeting_object 1.0";
   greetings.def("getVersion", &getVersion, "a function returning the version");
   
-   // bindings to Voiture class
     py::class_<Cle>(greetings, "Cle", py::dynamic_attr())
-        .def(py::init<const std::string &, int>())
+            .def(py::init<>())
         .def("initialize", &Cle::initialize)
         .def("getPrivateKey", &Cle::getPrivateKey)
-        .def("getPublicKey", &Cle::getPublicKey)
+        .def("getPublicKey", &Cle::getPublicKey);
 }
 
 int main() { 
-   // std::string a = "b8e29b9b0dddd58a709edba7d6df6c07ebdaf5653e325114bc5318c238f87f0"; 
-    Cle c = new Cle(); 
-    c.initialize("4b8e29b9b0dddd58a709edba7d6df6c07ebdaf5653e325114bc5318c238f87f0")
-    uint8_t publicKey[64]; privateToPublic(privateKey, publicKey); 
+    Cle* c = new Cle(); 
+    c->initialize("4b8e29b9b0dddd58a709edba7d6df6c07ebdaf5653e325114bc5318c238f87f0");
+    
+    // Ici, j'utilise la méthode getPublicKey de votre classe pour récupérer la clé publique.
+    std::string publicKey = c->getPublicKey(); 
+
     // Imprimer la clé publique 
-    for(int i=0; i<64; i++) { 
-        printf("%02X", publicKey[i]); 
+    for(size_t i=0; i<publicKey.size(); i++) { 
+        printf("%02X", (unsigned char)publicKey[i]); 
     } 
+
+    delete c;
     return 0; 
 }
-        
+
+
