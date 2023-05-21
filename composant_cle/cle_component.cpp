@@ -69,7 +69,7 @@ class Cle
 
         
 
-        std::string getPublicKeyHex() const {
+        std::string getPublicKey() const {
             return binaryToHex(publicKey);
         }
 
