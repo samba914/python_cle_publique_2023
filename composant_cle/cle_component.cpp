@@ -40,6 +40,15 @@ class Cle
             const struct uECC_Curve_t * curve = uECC_secp256k1(); 
             uECC_make_key(privateKey, publicKey, curve);
         }
+        std::string binaryToHex(const std::string& binary) {
+            std::string hex;
+            hex.reserve(binary.size() * 2);
+            for (unsigned char c : binary) {
+                hex.push_back("0123456789ABCDEF"[c >> 4]);
+                hex.push_back("0123456789ABCDEF"[c & 0xF]);
+            }
+            return hex;
+        }
 
     public:
         Cle() {}
@@ -58,9 +67,11 @@ class Cle
 	       return privateKey;
        	}
 
-        std::string getPublicKey() const {
-	       return publicKey;
-       	}
+        
+
+        std::string getPublicKeyHex() const {
+            return binaryToHex(publicKey);
+        }
 
 };
 
