@@ -37,9 +37,12 @@ class Cle
         }
 
         void calculatePublicKey(unsigned char *privateKey, unsigned char *publicKey) { 
-            const struct uECC_Curve_t * curve = uECC_secp256k1(); 
-            uECC_make_key(privateKey, publicKey, curve);
+            const struct uECC_Curve_t * curve = uECC_secp256k1();
+            if (!uECC_compute_public_key(privateKey, publicKey, curve)) {
+                // Handle error: computing public key failed
+            }
         }
+
         std::string binaryToHex(const std::string& binary) const {
             std::string hex;
             hex.reserve(binary.size() * 2);
@@ -87,22 +90,6 @@ PYBIND11_MODULE(cle_component,greetings)
         .def("initialize", &Cle::initialize)
         .def("getPrivateKey", &Cle::getPrivateKey)
         .def("getPublicKey", &Cle::getPublicKey);
-}
-
-int main() { 
-    Cle* c = new Cle(); 
-    c->initialize("4b8e29b9b0dddd58a709edba7d6df6c07ebdaf5653e325114bc5318c238f87f0");
-    
-    // Ici, j'utilise la méthode getPublicKey de votre classe pour récupérer la clé publique.
-    std::string publicKey = c->getPublicKey(); 
-
-    // Imprimer la clé publique 
-    for(size_t i=0; i<publicKey.size(); i++) { 
-        printf("%02X", (unsigned char)publicKey[i]); 
-    } 
-
-    delete c;
-    return 0; 
 }
 
 
