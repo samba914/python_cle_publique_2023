@@ -40,7 +40,7 @@ class Cle
             const struct uECC_Curve_t * curve = uECC_secp256k1(); 
             uECC_make_key(privateKey, publicKey, curve);
         }
-        std::string binaryToHex(const std::string& binary) {
+        std::string binaryToHex(const std::string& binary) const {
             std::string hex;
             hex.reserve(binary.size() * 2);
             for (unsigned char c : binary) {
